@@ -8,6 +8,5 @@
 		kernel,
 		stdlib
 	]},
-	{mod, {ohmyguard_app, []}},
 	{env, []}
 ]}.
