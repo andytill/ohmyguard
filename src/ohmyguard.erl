@@ -27,11 +27,11 @@
 %%  {eof,7}]
 
 parse_transform(AST_in, _Options) -> 
-    io:format("== AST ==~n~p~n== AST ==~n~n", [AST_in]),
+    %io:format("== AST ==~n~p~n== AST ==~n~n", [AST_in]),
 
     AST_in_1 = [ast(A) || A <- AST_in],
     
-    io:format("~n== New AST ==~n~p~n== New AST ==~n~n", [AST_in_1]),
+    %io:format("~n== New AST ==~n~p~n== New AST ==~n~n", [AST_in_1]),
 
     AST_in_1.
 
