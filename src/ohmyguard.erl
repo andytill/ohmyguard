@@ -2,9 +2,6 @@
 
 -export([parse_transform/2]).
 
-
-
-
 %% Convert this jazz...
 %%
 %% [{attribute,1,file,{"omg_simplest.erl",1}},

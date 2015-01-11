@@ -25,6 +25,14 @@ omg_reference(X/reference) -> X.
 omg_ref(X/ref) -> X.
 omg_tuple(X/tuple) -> X.
 
+omg_atom_atom(X/atom, Y/atom) -> {X, Y}.
+
+% TODO this is probably being checked twice
+omg_atom_guard(X/atom) when is_atom(X) -> X.
+
+omg_pid_number(X/pid, Y/atom) -> {X, Y}.
+
+
 %% =============================================================================
 %% tests
 %% =============================================================================
@@ -62,3 +70,14 @@ omg_not_port_test()      -> ?assertException(error, function_clause, omg_port(1)
 omg_not_reference_test() -> ?assertException(error, function_clause, omg_reference(1)).
 omg_not_ref_test()       -> ?assertException(error, function_clause, omg_ref(1)).
 omg_not_tuple_test()     -> ?assertException(error, function_clause, omg_tuple(1)).
+
+omg_atom_atom_test()       -> ?assertEqual({derp, troll}, omg_atom_atom(derp, troll)).
+omg_not_atom_atom_1_test() -> ?assertException(error, function_clause, omg_atom_atom(1, troll)).
+omg_not_atom_atom_2_test() -> ?assertException(error, function_clause, omg_atom_atom(derp, 1)).
+omg_not_atom_atom_3_test() -> ?assertException(error, function_clause, omg_atom_atom(1, 1)).
+
+omg_atom_guard_test() -> ?assertEqual(derp, omg_atom_guard(derp)).
+
+omg_pid_number_test() -> 
+    P = spawn(fun() -> ok end),
+    ?assertEqual({P, derp}, omg_pid_number(P, derp)).
