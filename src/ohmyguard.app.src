@@ -1,0 +1,13 @@
+{application, ohmyguard, [
+	{description, ""},
+	{vsn, "0.1.0"},
+	{id, "git"},
+	{modules, []},
+	{registered, []},
+	{applications, [
+		kernel,
+		stdlib
+	]},
+	{mod, {ohmyguard_app, []}},
+	{env, []}
+]}.
