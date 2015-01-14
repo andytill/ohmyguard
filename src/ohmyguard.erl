@@ -25,15 +25,31 @@
 %%                     [[{call,7,{atom,7,is_binary},[{var,7,'X'}]}]],
 %%                     [{atom,7,ok}]}]},
 %%  {eof,7}]
+%%
+%%
+%% [{attribute,1,file,{"test/omg_simplest.erl",1}},
+%% {attribute,1,module,omg_simplest},
+%% {attribute,1,file,{"/usr/lib/erlang/lib/eunit-2.2.7/include/eunit.hrl",1}},
+%% {attribute,6,file,{"test/omg_simplest.erl",6}},
+%% {attribute,11,record,
+%%            {myrec,[{record_field,11,{atom,11,field},{atom,11,value}}]}},
+%% {function,13,omg_record,1,
+%%           [{clause,13,
+%%                    [{var,13,'Rec'}],
+%%                    [[{call,13, {atom,13,is_record}, [{var,13,'Rec'},{atom,13,myrec}]}]],
+%%                    [{var,13,'Rec'}]}]},
+%% {eof,111}]
+
+
 
 parse_transform(AST_in, _Options) -> 
-    %io:format("== AST ==~n~p~n== AST ==~n~n", [AST_in]),
+    % io:format("== AST ==~n~p~n== AST ==~n~n", [AST_in]),
 
-    AST_in_1 = [ast(A) || A <- AST_in],
+    AST_out = [ast(A) || A <- AST_in],
     
-    %io:format("~n== New AST ==~n~p~n== New AST ==~n~n", [AST_in_1]),
+    % io:format("~n== New AST ==~n~p~n== New AST ==~n~n", [AST_out]),
 
-    AST_in_1.
+    AST_out.
 
 ast({function, _, _, _, Clauses_0} = Func_AST) ->
     Clauses_1 = [transform_clause(C) || C <- Clauses_0],
@@ -41,33 +57,59 @@ ast({function, _, _, _, Clauses_0} = Func_AST) ->
 ast(Other_AST) ->
     Other_AST.
 
-transform_clause({clause, N, Args, Guards, Body}) when length(Args) > 0 ->
+transform_clause({clause, N, Args, Guards_0, Body}) ->
     {Args_1, Types} = lists:mapfoldl(fun transform_args/2, [], Args),
     Types_Guards = [type_guard(N, T) || T <- Types],
-    {clause, N, Args_1, [Types_Guards | Guards], Body};
-transform_clause(Clause) ->
-    Clause.
+    Guards_1 =
+        case Types_Guards of
+            [] -> Guards_0;
+            _  -> [Types_Guards | Guards_0]
+        end,
+    {clause, N, Args_1, Guards_1, Body}.
 
 transform_args({var, _, _} = Var, Acc) ->
     {Var, Acc};
 transform_args({op, N, '/', {var, N, Var_name} = Arg, {atom, N, Var_type}}, Acc) ->
-    {Arg, [{Var_name, Var_type} | Acc]}.
+    {Arg, [{Var_name, Var_type} | Acc]};
+transform_args({op, N, '/', {var, N, Var_name} = Arg, {record,N,Record_name,[]}}, Acc) ->
+    {Arg, [{Var_name, Record_name} | Acc]};
+transform_args(Match, Acc) when element(1, Match) == match ->
+    % a match looks like myfunc(#myrec{} = Rec) -> ok.
+    {Match, Acc}.
 
-type_guard(N, {Name, Type}) ->
-    {call, N, {atom, N, type_to_guard(Type)}, [{var, N, Name}]}.
+type_guard(N, {Var_name, Type}) ->
+    case maps:find(Type, type_to_guards()) of
+        {ok, Guard} -> primitive_guard(N, Var_name, Guard);
+        error       -> record_guard(N, Var_name, Type) 
+    end.
+
+record_guard(N, Var_name, Record_name)
+        when
+            is_integer(N),
+            is_atom(Var_name),
+            is_atom(Record_name) ->
+    {call, N, {atom,N,is_record}, [{var,N,Var_name}, {atom,N,Record_name}]}.
+
+primitive_guard(N, Name, Guard)
+        when
+            is_integer(N),
+            is_atom(Name),
+            is_atom(Guard) ->
+    {call, N, {atom,N,Guard}, [{var,N,Name}]}.
 
 %% all the types that are allowed after the the slash as a guard.
-type_to_guard(atom)      -> is_atom;
-type_to_guard(binary)    -> is_binary;
-type_to_guard(bitstring) -> is_bitstring;
-type_to_guard(float)     -> is_float;
-type_to_guard(function)  -> is_function;
-type_to_guard(integer)   -> is_integer;
-type_to_guard(list)      -> is_list;
-type_to_guard(map)       -> is_map;
-type_to_guard(number)    -> is_number;
-type_to_guard(pid)       -> is_pid;
-type_to_guard(port)      -> is_port;
-type_to_guard(reference) -> is_reference;
-type_to_guard(ref)       -> is_reference;
-type_to_guard(tuple)     -> is_tuple.
+type_to_guards() ->
+    #{ atom => is_atom,
+       binary => is_binary,
+       bitstring => is_bitstring,
+       float => is_float,
+       function => is_function,
+       integer => is_integer,
+       list => is_list,
+       map => is_map,
+       number => is_number,
+       pid => is_pid,
+       port => is_port,
+       reference => is_reference,
+       ref => is_reference,
+       tuple => is_tuple }.

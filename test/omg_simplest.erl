@@ -2,13 +2,15 @@
 
 -compile({parse_transform, ohmyguard}).
 
--export([omg_binary/1]).
-
 -include_lib("eunit/include/eunit.hrl").
 
 %% =============================================================================%%
-%%
+%% usage
 %% =============================================================================
+
+-record(myrec, {field = value}).
+
+omg_record(Rec/#myrec{}) -> Rec.
 
 omg_atom(X/atom) -> X.
 omg_binary(X/binary) -> X.
@@ -30,31 +32,50 @@ omg_atom_atom(X/atom, Y/atom) -> {X, Y}.
 % TODO this is probably being checked twice
 omg_atom_guard(X/atom) when is_atom(X) -> X.
 
-omg_pid_number(X/pid, Y/atom) -> {X, Y}.
+omg_pid_atom(X/pid, Y/atom) -> {X, Y}.
+
+omg_no_guard(X) -> X.
+
+omg_no_guard_2(X, Y) -> {X, Y}.
 
 
 %% =============================================================================
 %% tests
 %% =============================================================================
 
-omg_atom_test()      -> ?assertEqual(derp, omg_atom(derp)).
-omg_binary_test()    -> ?assertEqual(<<"hello">>, omg_binary(<<"hello">>)).
-omg_bitstring_test() -> ?assertEqual(<<4:1,4:6>>, omg_bitstring(<<4:1,4:6>>)).
-omg_float_test()     -> ?assertEqual(3.5, omg_float(3.5)).
-omg_function_test()  -> F = fun() -> ok end,
-                        ?assertEqual(F, omg_function(F)).
-omg_integer_test()   -> ?assertEqual(8, omg_integer(8)).
-omg_list_test()      -> ?assertEqual([1,3,4], omg_list([1,3,4])).
-omg_map_test()       -> ?assertEqual(#{ n => 2 }, omg_map(#{ n => 2 })).
-omg_number_test()    -> ?assertEqual(2, omg_number(2)).
-omg_pid_test()       -> P = spawn(fun() -> ok end),
-                        ?assertEqual(P, omg_pid(P)).
-% omg_port_test()      -> ?assertEqual(derp, omg_port(derp)). TODO
-omg_reference_test() -> Ref = make_ref(),
-                        ?assertEqual(Ref, omg_reference(Ref)).
-omg_ref_test()       -> Ref = make_ref(),
-                        ?assertEqual(Ref, omg_ref(Ref)).
-omg_tuple_test()     -> ?assertEqual({}, omg_tuple({})).
+omg_atom_test() -> 
+    ?assertEqual(derp, omg_atom(derp)).
+omg_binary_test() -> 
+    ?assertEqual(<<"hello">>, omg_binary(<<"hello">>)).
+omg_bitstring_test() -> 
+    ?assertEqual(<<4:1,4:6>>, omg_bitstring(<<4:1,4:6>>)).
+omg_float_test() -> 
+    ?assertEqual(3.5, omg_float(3.5)).
+omg_function_test() ->
+    F = fun() -> ok end,
+    ?assertEqual(F, omg_function(F)).
+omg_integer_test() -> 
+    ?assertEqual(8, omg_integer(8)).
+omg_list_test() -> 
+    ?assertEqual([1,3,4], omg_list([1,3,4])).
+omg_map_test() -> 
+    ?assertEqual(#{ n => 2 }, omg_map(#{ n => 2 })).
+omg_number_test()    -> 
+    ?assertEqual(2, omg_number(2)).
+omg_pid_test() -> 
+    P = spawn(fun() -> ok end),
+    ?assertEqual(P, omg_pid(P)).
+% TODO port type test
+% omg_port_test()      -> 
+%    ?assertEqual(derp, omg_port(derp)).
+omg_reference_test() ->
+    Ref = make_ref(),
+    ?assertEqual(Ref, omg_reference(Ref)).
+omg_ref_test() -> 
+    Ref = make_ref(),
+    ?assertEqual(Ref, omg_ref(Ref)).
+omg_tuple_test() -> 
+    ?assertEqual({}, omg_tuple({})).
 
 omg_not_atom_test()      -> ?assertException(error, function_clause, omg_atom(1)).
 omg_not_binary_test()    -> ?assertException(error, function_clause, omg_binary(1)).
@@ -76,8 +97,15 @@ omg_not_atom_atom_1_test() -> ?assertException(error, function_clause, omg_atom_
 omg_not_atom_atom_2_test() -> ?assertException(error, function_clause, omg_atom_atom(derp, 1)).
 omg_not_atom_atom_3_test() -> ?assertException(error, function_clause, omg_atom_atom(1, 1)).
 
-omg_atom_guard_test() -> ?assertEqual(derp, omg_atom_guard(derp)).
+omg_atom_guard_test() -> 
+    ?assertEqual(derp, omg_atom_guard(derp)).
 
 omg_pid_number_test() -> 
     P = spawn(fun() -> ok end),
-    ?assertEqual({P, derp}, omg_pid_number(P, derp)).
+    ?assertEqual({P, derp}, omg_pid_atom(P, derp)).
+
+omg_no_guard_test() -> 
+    ?assertEqual(1, omg_no_guard(1)).
+
+omg_no_guard_2_test() -> 
+    ?assertEqual({1,2}, omg_no_guard_2(1,2)).
