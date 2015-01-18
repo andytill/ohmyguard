@@ -38,6 +38,10 @@ omg_no_guard(X) -> X.
 
 omg_no_guard_2(X, Y) -> {X, Y}.
 
+omg_func_2_clause(V/list) ->
+    {list, V};
+omg_func_2_clause(V/atom) ->
+    {atom, V}.
 
 %% =============================================================================
 %% tests
@@ -109,3 +113,9 @@ omg_no_guard_test() ->
 
 omg_no_guard_2_test() -> 
     ?assertEqual({1,2}, omg_no_guard_2(1,2)).
+
+omg_func_2_clause_with_atom_test() ->
+    ?assertEqual({atom, ten}, omg_func_2_clause(ten)).
+
+omg_func_2_clause_with_list_test() ->
+    ?assertEqual({list, [ten]}, omg_func_2_clause([ten])).
