@@ -59,20 +59,6 @@ It would be better if record guards looked like `f(Rec/#myrec) -> Rec.` but this
 
 ## Syntax that still needs to be implemented...
 
-##### Tuples in function clauses
-
-```erlang
-omg_pid_atom({X/pid, Y/atom}) -> 
-    {X, Y}.
-```
-
-##### Lists in function clauses
-
-```erlang
-omg_list([H/integer | T]) -> 
-    ok.
-```
-
 ##### Case statements
 
 ```erlang

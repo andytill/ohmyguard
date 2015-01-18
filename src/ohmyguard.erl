@@ -71,8 +71,23 @@ transform_clause({clause, N, Args, Guards_0, Body}) ->
 %% arguments and a list of all guards that need to be created.
 transform_args({var, _, _} = Var, Acc) ->
     {Var, Acc};
-transform_args({tuple, N, Elements} = Var, Acc) ->
-    {Elements_1, Acc_1} = lists:mapfoldl(fun transform_args/2, [], Elements),
+transform_args({cons, N, Head, Tail}, Acc) ->
+    %% handle the head element of lists
+    {Head_1, Acc_1} = transform_args(Head, Acc),
+
+    % we could easily just pass the tail into transform args, but I don't want
+    % nil to leak out into general arg checking since it is specific to lists
+    {Tail_1, Acc_2} = 
+        case Tail of
+            {nil, _} = Nil ->
+                {Nil, Acc_1};
+            _ ->
+                transform_args(Tail, Acc_1)
+        end,
+    Cons = {cons, N, Head_1, Tail_1},
+    {Cons, Acc_2};
+transform_args({tuple, N, Elements}, Acc) ->
+    {Elements_1, Acc_1} = lists:mapfoldl(fun transform_args/2, Acc, Elements),
     {{tuple, N, Elements_1}, Acc_1};
 transform_args({op, N, '/', {var, N, Var_name} = Arg, {atom, N, Var_type}}, Acc) ->
     {Arg, [{Var_name, Var_type} | Acc]};

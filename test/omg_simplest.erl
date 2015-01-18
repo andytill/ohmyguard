@@ -52,6 +52,17 @@ omg_vars_in_tuple({A/atom, N/integer}) ->
 omg_vars_in_nested_tuple({A/atom, {N/integer}}) ->
     {atom, A, integer, N}.
 
+omg_vars_in_list([N/integer]) ->
+    {integer, N}.
+
+omg_vars_in_list_with_tail([N/integer | Tail]) ->
+    [{integer, N} | Tail].
+
+omg_vars_in_nested_list([[N/integer]]) ->
+    {integer, N}.
+
+omg_vars_in_csv_list([N/integer, A/atom, T/tuple]) ->
+    {N, A, T}.
 
 %% =============================================================================
 %% tests
@@ -144,3 +155,30 @@ omg_vars_in_nested_tuple_test() ->
 
 omg_vars_in_nested_tuple_function_clause_test() ->
     ?assertException(error, function_clause, omg_vars_in_nested_tuple({33, {derp}})).
+
+omg_vars_in_list_test() ->
+    ?assertEqual({integer, 44}, omg_vars_in_list([44])).
+
+omg_vars_in_list_function_clause_test() ->
+    ?assertException(error, function_clause, omg_vars_in_nested_tuple([derp])).
+
+omg_vars_in_list_with_tail() ->
+    ?assertEqual([{integer, 44}, 55, 66], omg_vars_in_list_with_tail([44, 55, 66])).
+
+omg_vars_in_nested_list_test() ->
+    ?assertEqual({integer, 44}, omg_vars_in_nested_list([[44]])).
+
+omg_vars_in_nested_list_function_clause_test() ->
+    ?assertException(error, function_clause, omg_vars_in_nested_list([[derp]])).
+
+omg_vars_in_csv_list_test() ->
+    ?assertEqual({1, derp, {}}, omg_vars_in_csv_list([1, derp, {}])).
+
+omg_vars_in_csv_list_function_clause_1_test() ->
+    ?assertException(error, function_clause, omg_vars_in_csv_list([derp, derp, {}])).
+
+omg_vars_in_csv_list_function_clause_2_test() ->
+    ?assertException(error, function_clause, omg_vars_in_csv_list([1, 1, {}])).
+
+omg_vars_in_csv_list_function_clause_3_test() ->
+    ?assertException(error, function_clause, omg_vars_in_csv_list([1, derp, derp])).
