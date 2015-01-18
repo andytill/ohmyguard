@@ -1,6 +1,6 @@
 # ohmyguard
 
-Parse transform for converting `my_func(X/binary) -> X.` to `my_func(X) when is_binary(X) -> X`.
+Parse transform for converting `my_func(X) when is_binary(X) -> X` to `my_func(X/binary) -> X.`.
 
 ## Why?
 
