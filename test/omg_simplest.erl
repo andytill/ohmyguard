@@ -43,6 +43,16 @@ omg_func_2_clause(V/list) ->
 omg_func_2_clause(V/atom) ->
     {atom, V}.
 
+omg_var_in_tuple({V/atom}) ->
+    {atom, V}.
+
+omg_vars_in_tuple({A/atom, N/integer}) ->
+    {atom, A, integer, N}.
+
+omg_vars_in_nested_tuple({A/atom, {N/integer}}) ->
+    {atom, A, integer, N}.
+
+
 %% =============================================================================
 %% tests
 %% =============================================================================
@@ -119,3 +129,18 @@ omg_func_2_clause_with_atom_test() ->
 
 omg_func_2_clause_with_list_test() ->
     ?assertEqual({list, [ten]}, omg_func_2_clause([ten])).
+
+omg_var_in_tuple_test() ->
+    ?assertEqual({atom, ok}, omg_var_in_tuple({ok})).
+
+omg_vars_in_tuple_test() ->
+    ?assertEqual({atom, derp, integer, 22}, omg_vars_in_tuple({derp, 22})).
+
+omg_vars_in_tuple_function_clause_test() ->
+    ?assertException(error, function_clause, omg_vars_in_tuple({22, derp})).
+
+omg_vars_in_nested_tuple_test() ->
+    ?assertEqual({atom, derp, integer, 33}, omg_vars_in_nested_tuple({derp, {33}})).
+
+omg_vars_in_nested_tuple_function_clause_test() ->
+    ?assertException(error, function_clause, omg_vars_in_nested_tuple({33, {derp}})).

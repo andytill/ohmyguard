@@ -67,8 +67,13 @@ transform_clause({clause, N, Args, Guards_0, Body}) ->
         end,
     {clause, N, Args_1, Guards_1, Body}.
 
+%% take the AST containing the `V/type' syntax and return regular AST for 
+%% arguments and a list of all guards that need to be created.
 transform_args({var, _, _} = Var, Acc) ->
     {Var, Acc};
+transform_args({tuple, N, Elements} = Var, Acc) ->
+    {Elements_1, Acc_1} = lists:mapfoldl(fun transform_args/2, [], Elements),
+    {{tuple, N, Elements_1}, Acc_1};
 transform_args({op, N, '/', {var, N, Var_name} = Arg, {atom, N, Var_type}}, Acc) ->
     {Arg, [{Var_name, Var_type} | Acc]};
 transform_args({op, N, '/', {var, N, Var_name} = Arg, {record,N,Record_name,[]}}, Acc) ->
