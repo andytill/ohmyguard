@@ -63,7 +63,7 @@ It would be better if record guards looked like `f(Rec/#myrec) -> Rec.` but this
 
 ```erlang
 case V of
-	{ok, V/binary} -> V
+	{ok, A/binary} -> A
 end
 ```
 
