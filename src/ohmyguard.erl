@@ -93,9 +93,8 @@ transform_args({op, N, '/', {var, N, Var_name} = Arg, {atom, N, Var_type}}, Acc)
     {Arg, [{Var_name, Var_type} | Acc]};
 transform_args({op, N, '/', {var, N, Var_name} = Arg, {record,N,Record_name,[]}}, Acc) ->
     {Arg, [{Var_name, Record_name} | Acc]};
-transform_args(Match, Acc) when element(1, Match) == match ->
-    % a match looks like myfunc(#myrec{} = Rec) -> ok.
-    {Match, Acc}.
+transform_args(Other, Acc) ->
+    {Other, Acc}.
 
 type_guard(N, {Var_name, Type}) ->
     case maps:find(Type, type_to_guards()) of
